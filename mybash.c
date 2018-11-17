@@ -28,8 +28,6 @@ int main(int argc, char *argv[])
 
 	while(go)
 	{
-
-		printf("test\n");
 		char* path = getenv("PATH");
 		const char * delim = ":";
 		printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
@@ -89,11 +87,42 @@ int main(int argc, char *argv[])
 		for (int i = 0; i < data->TheCommands[0].numargs; ++i)
 			Param_List[i+1] = 	data->TheCommands[0].args[i];
 		Param_List[data->TheCommands[0].numargs+1] = NULL;
-	if(execvp(data->TheCommands[0].command, Param_List) == -1)
+	
+	if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
+	{
+
+		if (chdir(getenv("HOME")) != 0)
+			printf("Err\n");
+	}
+	else if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 1)
+	{
+		if (chdir(strcat(strcat(cwd,"/"),data->TheCommands[0].args[0]) ) != 0)
+					printf("Err\n");	}		
+	else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )
+	{
+		printf("%s\n",cwd);
+	}		
+	else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
+	{
+		printf("EXIT!\n\n");
+	}		
+	else if (strcmp(data->TheCommands[0].command, "set") == 0 )
+	{
+		printf("SET!\n\n");
+	}
+	else if (strcmp(data->TheCommands[0].command, "DEBUG=yes") == 0 )
+	{
+		printf("BUGON!\n\n");
+	}		
+	else if (strcmp(data->TheCommands[0].command, "DEBUG=no") == 0 )
+	{
+		printf("BUGOFF!\n\n");
+	}		
+
+	else if(execvp(data->TheCommands[0].command, Param_List) == -1)
 	{
 			while( subPATH != NULL )
 			{
-
 				strcat(subPATH, "/");
 				strcat(subPATH, data->TheCommands[0].command);
 				execvp(subPATH, Param_List);
