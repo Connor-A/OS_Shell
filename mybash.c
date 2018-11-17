@@ -26,18 +26,29 @@ int main(int argc, char *argv[])
 	
 	struct CommandData *data = &(struct CommandData){.numcommands = 0, .infile="", .outfile="", .background=0};
 
-	printf("test\n");
-	char* s = getenv("PATH");
-	const char * p = ":";
-	printf("PATH :%s\n",(s!=NULL)? s : "getenv returned NULL");
-	printf("end test\n");
-
-	char *command = strtok(s, p);
-	printf("NEWPATH :%s\n",(command!=NULL)? command: "returned NULL");
-
-
 	while(go)
 	{
+
+		printf("test\n");
+		char* path = getenv("PATH");
+		const char * delim = ":";
+		printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
+		printf("end test\n");
+
+
+		while(strstr(path,":"))
+		{
+
+			char *command = strtok(path, delim);
+	printf("Path:%s",path);
+	printf("\n----------------------------------------------------------\n");
+			printf("NEWPATH :%s\n",(command!=NULL)? command: "returned NULL");
+
+		}
+
+
+
+
 		char cwd[PATH_MAX];
    		if (getcwd(cwd, sizeof(cwd)) != NULL) {
        		printf("%s$  ", cwd);
@@ -83,9 +94,6 @@ int main(int argc, char *argv[])
 			}
 			printf("\n");
 		}
-
-
-
 
 
 
