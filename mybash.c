@@ -85,20 +85,22 @@ int main(int argc, char *argv[])
 		}
 
 		strcpy(subPATH,strtok(path, delim));
-		while( subPATH != NULL )
-		{
-			Param_List[0] = data->TheCommands[0].command; 
-			for (int i = 0; i < data->TheCommands[0].numargs; ++i)
-				Param_List[i+1] = 	data->TheCommands[0].args[i];
-			Param_List[data->TheCommands[0].numargs+1] = NULL;
+		Param_List[0] = data->TheCommands[0].command; 
+		for (int i = 0; i < data->TheCommands[0].numargs; ++i)
+			Param_List[i+1] = 	data->TheCommands[0].args[i];
+		Param_List[data->TheCommands[0].numargs+1] = NULL;
+	if(execvp(data->TheCommands[0].command, Param_List) == -1)
+	{
+			while( subPATH != NULL )
+			{
 
-			strcat(subPATH, "/");
-			strcat(subPATH, data->TheCommands[0].command);
-			execvp(subPATH, Param_List);
-			strcpy(subPATH,strtok(NULL, delim));
- 
-		}
-
+				strcat(subPATH, "/");
+				strcat(subPATH, data->TheCommands[0].command);
+				execvp(subPATH, Param_List);
+				strcpy(subPATH,strtok(NULL, delim));
+	 
+			}
+	}
 
 
 
