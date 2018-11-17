@@ -88,14 +88,18 @@ int main(int argc, char *argv[])
 		strcpy(subPATH,strtok(path, delim));
 		while( subPATH != NULL )
 		{
-			printf("%s\n", subPATH);
+			char* tmp[13];
+			tmp[0] = data->TheCommands[0].command; 
+			for (int i = 0; i < data->TheCommands[0].numargs; ++i)
+				tmp[i+1] = 	data->TheCommands[0].args[i];
+			tmp[data->TheCommands[0].numargs+1] = NULL;
+
+			printf("%s\n",tmp[1]);
+
 			strcat(subPATH, "/");
 			strcat(subPATH, data->TheCommands[0].command);
-			printf("%s\n", subPATH);
-			execvp(subPATH, data->TheCommands[0].args);
-			printf("%s\n", subPATH);
+			execvp(subPATH, tmp);
 			strcpy(subPATH,strtok(NULL, delim));
-			printf("%s\n\n", subPATH);
  
 		}
 
