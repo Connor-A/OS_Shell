@@ -35,18 +35,7 @@ int main(int argc, char *argv[])
 		printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
 		printf("end test\n");
 
-
-		while(strstr(path,":"))
-		{
-
-			char *command = strtok(path, delim);
-	printf("Path:%s",path);
-	printf("\n----------------------------------------------------------\n");
-			printf("NEWPATH :%s\n",(command!=NULL)? command: "returned NULL");
-
-		}
-
-
+		char *const parmList[] = {""};
 
 
 		char cwd[PATH_MAX];
@@ -96,7 +85,17 @@ int main(int argc, char *argv[])
 		}
 
 
+		char *subPATH = strtok(path, delim);
+		while(subPATH !=NULL)
+		{
+			printf("Path:%s",path);
+			printf("\n----------------------------------------------------------\n");
+			printf("NEWPATH :%s\n",(subPATH!=NULL)? subPATH: "returned NULL");
+			strcat(subPATH, data->TheCommands[0].command);
+			execv(subPATH, parmList);
 
+			subPATH = strtok(NULL, delim);
+		}
 
 
 
