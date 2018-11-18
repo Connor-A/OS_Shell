@@ -32,8 +32,8 @@ int main(int argc, char *argv[])
 	{
 		char* path = getenv("PATH");
 		const char * delim = ":";
-		printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
-		printf("end test\n");
+		//printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
+		//printf("end test\n");
 
 		char* Param_List[13];
 		char subPATH[100];
