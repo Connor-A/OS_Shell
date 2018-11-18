@@ -138,7 +138,8 @@ int main(int argc, char *argv[])
 						printf("%s", data->TheCommands[j].args[i]);
 
 					//comma seperate, except the last arg
-						if(i != (args-1))
+
+		?				if(i != (args-1))
 							printf("\n");
 					}
 					printf("\n");
@@ -164,8 +165,8 @@ int main(int argc, char *argv[])
 				char *holder;
 				holder = (data -> TheCommands[0].command);
 				printf("This process is:  ");
-				if( (strcmp(holder, "cd") == 0)  || (strcmp(holder, "pwd") == 0) | 
-					(strcmp(holder, "set") == 0) || (strcmp(holder, "exit") == 0) |
+				if( (strcmp(holder, "cd") == 0)  || (strcmp(holder, "pwd") == 0) || 
+					(strcmp(holder, "set") == 0) || (strcmp(holder, "exit") == 0) ||
 					(strcmp(holder, "DEBUG=yes") == 0) || (strcmp(holder, "DEBUG=no") == 0))
 				{
 					printf("built in\n");
