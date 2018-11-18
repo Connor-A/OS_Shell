@@ -148,11 +148,13 @@ int main(int argc, char *argv[])
 						exit(-1);
 					}
 				}
-				else
+				else if(data->background == 0)
 				{
 					ret_pid = wait(&status);
 					printf("Child complete: %d\n", ret_pid);
 				}
+				else
+					printf("I made it out!\n");
 			}
 
 
