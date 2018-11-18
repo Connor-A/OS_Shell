@@ -58,7 +58,17 @@ int main(int argc, char *argv[])
 			go = 0;
 		}
 		
-		if(!(strcmp(bashcommand, "DEBUG=yes") == 0 || strcmp(bashcommand, "DEBUG=no") == 0))
+		if (strcmp(bashcommand, "DEBUG=yes") == 0 )
+		{
+			printf("BUGON!\n\n");
+			debug = 1;
+		}		
+		else if (strcmp(bashcommand, "DEBUG=no") == 0 )
+		{
+			printf("BUGOFF!\n\n");
+			debug = 0;
+		}
+		else
 		{
 			ParseCommandLine(bashcommand, data); //populate the struct
 			
@@ -162,19 +172,8 @@ int main(int argc, char *argv[])
 				else
 					printf("not built in\n");
 			}
-		}
-
-		else if (strcmp(bashcommand, "DEBUG=yes") == 0 )
-		{
-			printf("BUGON!\n\n");
-			debug = 1;
 		}		
-		else if (strcmp(bashcommand, "DEBUG=no") == 0 )
-		{
-			printf("BUGOFF!\n\n");
-			debug = 0;
-		}		
-   }
+  }
 
     exit(0);
 }
