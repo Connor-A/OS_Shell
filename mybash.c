@@ -11,7 +11,7 @@
 
 #include <unistd.h>
 #include <limits.h>
- 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,7 +23,9 @@ int main(int argc, char *argv[])
 	int args = 0; //will hold the length of the argument list
 	int go = 1;
 	char bashcommand[2000];
-	
+	int debug = 0;
+
+
 	struct CommandData *data = &(struct CommandData){.numcommands = 0, .infile="", .outfile="", .background=0};
 
 	while(go)
@@ -37,15 +39,15 @@ int main(int argc, char *argv[])
 		char subPATH[100];
 
 		char cwd[PATH_MAX];
-   		if (getcwd(cwd, sizeof(cwd)) != NULL) {
-       		printf("%s$  ", cwd);
-   		} else {
-       		perror("getcwd() error");
-       		return 1;
-    	}
+		if (getcwd(cwd, sizeof(cwd)) != NULL) {
+			printf("%s$  ", cwd);
+		} else {
+			perror("getcwd() error");
+			return 1;
+		}
 
-    	if(scanf("%[^\n]" , bashcommand) == 1)
-    		printf("\n");
+		if(scanf("%[^\n]" , bashcommand) == 1)
+			printf("\n");
 		else
 			printf("%s\n", "Failed");
 
@@ -56,115 +58,122 @@ int main(int argc, char *argv[])
 			go = 0;
 		}
 		
-
-		ParseCommandLine(bashcommand, data); //populate the struct
-		
-		//iterte over each command and rint it
-		for(int j = 0; j < data->numcommands; j++)
+		if(!(strcmp(bashcommand, "DEBUG=yes") == 0 || strcmp(bashcommand, "DEBUG=no") == 0))
 		{
-			printf("Command #"); printf("%u",j); printf(": ");
-			printf("%s\n", data->TheCommands[j].command);
-			args = data->TheCommands[j].numargs;
-
-			//if there are arguments for this command, list them
-
-			//iterate over each argument for this command
-			for(int i = 0; i < args; i++)
+			ParseCommandLine(bashcommand, data); //populate the struct
+			
+			//iterte over each command and rint it
+			for(int j = 0; j < data->numcommands; j++)
 			{
-				if(args!=0)
-				printf("\targs # %u: ", i);
-				printf("%s", data->TheCommands[j].args[i]);
+				printf("Command #"); printf("%u",j); printf(": ");
+				printf("%s\n", data->TheCommands[j].command);
+				args = data->TheCommands[j].numargs;
 
-				//comma seperate, except the last arg
-				if(i != (args-1))
-					printf("\n");
+				//if there are arguments for this command, list them
+
+				//iterate over each argument for this command
+				for(int i = 0; i < args; i++)
+				{
+					if(args!=0)
+						printf("\targs # %u: ", i);
+					printf("%s", data->TheCommands[j].args[i]);
+
+					//comma seperate, except the last arg
+					if(i != (args-1))
+						printf("\n");
+				}
+				printf("\n");
 			}
-			printf("\n");
+
+			strcpy(subPATH,strtok(path, delim));
+			Param_List[0] = data->TheCommands[0].command; 
+			for (int i = 0; i < data->TheCommands[0].numargs; ++i)
+				Param_List[i+1] = 	data->TheCommands[0].args[i];
+			Param_List[data->TheCommands[0].numargs+1] = NULL;
+
+			if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
+			{
+
+				if (chdir(getenv("HOME")) != 0)
+					printf("Err\n");
+			}
+			else if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 1)
+			{
+				if (chdir(strcat(strcat(cwd,"/"),data->TheCommands[0].args[0]) ) != 0)
+					printf("Err\n");
+			}
+
+			else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )
+			{
+				printf("%s\n",cwd);
+			}		
+			else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
+			{
+				printf("EXIT!\n\n");
+			}		
+			else if (strcmp(data->TheCommands[0].command, "set") == 0 )
+			{
+				printf("SET!\n\n");
+			}
+
+			else if(execvp(data->TheCommands[0].command, Param_List) == -1)
+			{
+				while( subPATH != NULL )
+				{
+					strcat(subPATH, "/");
+					strcat(subPATH, data->TheCommands[0].command);
+					execvp(subPATH, Param_List);
+					strcpy(subPATH,strtok(NULL, delim));
+
+				}
+			}
+
+
+
+
+
+			if(debug == 1)
+			{
+				//print input file
+				printf("Input File: ");
+				printf("%s", data->infile);
+
+				//print output file
+				printf("\nOutput File: ");
+				printf("%s", data->outfile);
+				printf("\n");
+
+				//print foreground/background mode
+				printf("This process is running in the:  ");
+				if(data -> background == 0)	
+					printf("foreground\n");
+				else
+					printf("background\n");
+
+				char *holder;
+				holder = (data -> TheCommands[0].command);
+				printf("This process is:  ");
+				if( (strcmp(holder, "cd") == 0)  || (strcmp(holder, "pwd") == 0) | 
+					(strcmp(holder, "set") == 0) || (strcmp(holder, "exit") == 0) |
+					(strcmp(holder, "DEBUG=yes") == 0) || (strcmp(holder, "DEBUG=no") == 0))
+				{
+					printf("built in\n");
+				}
+				else
+					printf("not built in\n");
+			}
 		}
 
-		strcpy(subPATH,strtok(path, delim));
-		Param_List[0] = data->TheCommands[0].command; 
-		for (int i = 0; i < data->TheCommands[0].numargs; ++i)
-			Param_List[i+1] = 	data->TheCommands[0].args[i];
-		Param_List[data->TheCommands[0].numargs+1] = NULL;
-	
-	if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
-	{
-
-		if (chdir(getenv("HOME")) != 0)
-			printf("Err\n");
-	}
-	else if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 1)
-	{
-		if (chdir(strcat(strcat(cwd,"/"),data->TheCommands[0].args[0]) ) != 0)
-					printf("Err\n");	}		
-	else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )
-	{
-		printf("%s\n",cwd);
-	}		
-	else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
-	{
-		printf("EXIT!\n\n");
-	}		
-	else if (strcmp(data->TheCommands[0].command, "set") == 0 )
-	{
-		printf("SET!\n\n");
-	}
-	else if (strcmp(data->TheCommands[0].command, "DEBUG=yes") == 0 )
-	{
-		printf("BUGON!\n\n");
-	}		
-	else if (strcmp(data->TheCommands[0].command, "DEBUG=no") == 0 )
-	{
-		printf("BUGOFF!\n\n");
-	}		
-
-	else if(execvp(data->TheCommands[0].command, Param_List) == -1)
-	{
-			while( subPATH != NULL )
-			{
-				strcat(subPATH, "/");
-				strcat(subPATH, data->TheCommands[0].command);
-				execvp(subPATH, Param_List);
-				strcpy(subPATH,strtok(NULL, delim));
-	 
-			}
-	}
-
-
-
-
-
-
-
-		/*
-		//print input file
-		printf("Input File: ");
-		printf("%s", data->infile);
-
-		//print output file
-		printf("\nOutput File: ");
-		printf("%s", data->outfile);
-		printf("\n");
-
-		//print foreground/background mode
-		printf("This process is running in the:  ");
-		if(data -> background == 0)	
-			printf("foreground\n");
-		else
-			printf("background\n");
-
-		char *holder;
-		holder = (data -> TheCommands[0].command);
-		printf("This process is:  ");
-		if( (strcmp(holder, "cd") == 0)  || (strcmp(holder, "pwd") == 0) | 
-			(strcmp(holder, "set") == 0) || (strcmp(holder, "exit") == 0) |
-			(strcmp(holder, "DEBUG=yes") == 0) || (strcmp(holder, "DEBUG=no") == 0))
+		else if (strcmp(bashcommand, "DEBUG=yes") == 0 )
 		{
-			printf("built in\n");
-		}
-		else
-			printf("not built in\n");*/
+			printf("BUGON!\n\n");
+			debug = 1;
+		}		
+		else if (strcmp(bashcommand, "DEBUG=no") == 0 )
+		{
+			printf("BUGOFF!\n\n");
+			debug = 0;
+		}		
    }
 
     exit(0);
