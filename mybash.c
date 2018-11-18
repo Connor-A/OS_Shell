@@ -60,12 +60,12 @@ int main(int argc, char *argv[])
 		
 		if (strcmp(bashcommand, "DEBUG=yes") == 0 )
 		{
-			printf("BUGON!\n\n");
+			printf("Entering debug mode\n\n");
 			debug = 1;
 		}		
 		else if (strcmp(bashcommand, "DEBUG=no") == 0 )
 		{
-			printf("BUGOFF!\n\n");
+			printf("Exiting debug mode\n\n");
 			debug = 0;
 		}
 		else
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 			}		
 			else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
 			{
-				printf("EXIT!\n\n");
+				printf("The program will now terminate\n\n");
 			}		
 			else if (strcmp(data->TheCommands[0].command, "set") == 0 )
 			{
