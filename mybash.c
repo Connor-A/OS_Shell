@@ -139,7 +139,7 @@ int main(int argc, char *argv[])
 
 					//comma seperate, except the last arg
 
-		?				if(i != (args-1))
+						if(i != (args-1))
 							printf("\n");
 					}
 					printf("\n");
