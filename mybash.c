@@ -10,6 +10,7 @@
  */
 
 #include <unistd.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -116,6 +117,15 @@ int main(int argc, char *argv[])
 				}
 				else if(pid == 0)
 				{
+					int fd;
+					char *filename = data->infile;
+					if(filename != NULL)
+					{
+						fd = open(filename, O_RDONLY ,0);
+						dup2(fd, STDIN_FILENO);
+						close(fd);
+					}
+					
 					if(execvp(data->TheCommands[0].command, Param_List) == -1)
 					{
 						while( subPATH != NULL )
