@@ -117,13 +117,18 @@ int main(int argc, char *argv[])
 				}
 				else if(pid == 0)
 				{
-					int fd;
-					char *filename = data->infile;
-					if(filename != NULL)
+					int fdi, fdo;
+					if(data->infile != NULL)
 					{
-						fd = open(filename, O_RDONLY ,0);
-						dup2(fd, STDIN_FILENO);
-						close(fd);
+						fdi = open(data->infile, O_RDONLY ,0);
+						dup2(fdi, STDIN_FILENO);
+						close(fdi);
+					}
+					if(data->outfile != NULL)
+					{
+						fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+						dup2(fdo, STDOUT_FILENO);
+						close(fdo);
 					}
 					
 					if(execvp(data->TheCommands[0].command, Param_List) == -1)
