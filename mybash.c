@@ -72,29 +72,6 @@ int main(int argc, char *argv[])
 		{
 			ParseCommandLine(bashcommand, data); //populate the struct
 			
-			//iterte over each command and rint it
-			for(int j = 0; j < data->numcommands; j++)
-			{
-				printf("Command #"); printf("%u",j); printf(": ");
-				printf("%s\n", data->TheCommands[j].command);
-				args = data->TheCommands[j].numargs;
-
-				//if there are arguments for this command, list them
-
-				//iterate over each argument for this command
-				for(int i = 0; i < args; i++)
-				{
-					if(args!=0)
-						printf("\targs # %u: ", i);
-					printf("%s", data->TheCommands[j].args[i]);
-
-					//comma seperate, except the last arg
-					if(i != (args-1))
-						printf("\n");
-				}
-				printf("\n");
-			}
-
 			strcpy(subPATH,strtok(path, delim));
 			Param_List[0] = data->TheCommands[0].command; 
 			for (int i = 0; i < data->TheCommands[0].numargs; ++i)
@@ -144,6 +121,30 @@ int main(int argc, char *argv[])
 
 			if(debug == 1)
 			{
+				//iterte over each command and rint it
+				for(int j = 0; j < data->numcommands; j++)
+				{
+					printf("Command #"); printf("%u",j); printf(": ");
+					printf("%s\n", data->TheCommands[j].command);
+					args = data->TheCommands[j].numargs;
+
+				//if there are arguments for this command, list them
+
+				//iterate over each argument for this command
+					for(int i = 0; i < args; i++)
+					{
+						if(args!=0)
+							printf("\targs # %u: ", i);
+						printf("%s", data->TheCommands[j].args[i]);
+
+					//comma seperate, except the last arg
+						if(i != (args-1))
+							printf("\n");
+					}
+					printf("\n");
+				}
+
+
 				//print input file
 				printf("Input File: ");
 				printf("%s", data->infile);
