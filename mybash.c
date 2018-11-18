@@ -11,7 +11,8 @@
 
 #include <unistd.h>
 #include <limits.h>
-
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -24,6 +25,8 @@ int main(int argc, char *argv[])
 	int go = 1;
 	char bashcommand[2000];
 	int debug = 0;
+	pid_t pid, ret_pid;
+	int status;
 
 
 	struct CommandData *data = &(struct CommandData){.numcommands = 0, .infile="", .outfile="", .background=0};
@@ -103,15 +106,37 @@ int main(int argc, char *argv[])
 				printf("SET!\n\n");
 			}
 
-			else if(execvp(data->TheCommands[0].command, Param_List) == -1)
+			else 
 			{
-				while( subPATH != NULL )
+				pid = fork();
+				if(pid < 0)
 				{
-					strcat(subPATH, "/");
-					strcat(subPATH, data->TheCommands[0].command);
-					execvp(subPATH, Param_List);
-					strcpy(subPATH,strtok(NULL, delim));
+					printf("Fork Failed\n");
+					exit(-1);
+				}
+				else if(pid == 0)
+				{
+					if(execvp(data->TheCommands[0].command, Param_List) == -1)
+					{
+						while( subPATH != NULL )
+						{
+							strcat(subPATH, "/");
+							strcat(subPATH, data->TheCommands[0].command);
+							execvp(subPATH, Param_List);
+							strcpy(subPATH,strtok(NULL, delim));
 
+						}
+					}
+					else
+					{
+						printf("Exec failed\n");
+						exit(-1);
+					}
+				}
+				else
+				{
+					ret_pid = wait(&status);
+					printf("Child complete: %d\n", ret_pid);
 				}
 			}
 
