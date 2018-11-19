@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
 	{
 		int args = 0; //will hold the length of the argument list
 		char bashcommand[2000];
-		pid_t pid, ret_pid;
+		pid_t pid;
 		int status;
 
 
@@ -115,6 +115,15 @@ int main(int argc, char *argv[])
 
 				else 
 				{
+					int tmpin = dup(0);
+					int tmpout = dup(1);
+
+					int fdin, fdout;
+					if(data -> infile != NULL)
+						fdin = open(data -> infile, O_RDONLY, 0);
+					else
+						fdin = dup(0);
+
 					pid = fork();
 					if(pid < 0)
 					{
@@ -123,47 +132,65 @@ int main(int argc, char *argv[])
 					}
 					else if(pid == 0)
 					{
-						int fdi, fdo;
-						if(data->infile != NULL)
+						for(int i = 0; i < data -> numcommands; ++i)
 						{
-							fdi = open(data->infile, O_RDONLY ,0);
-							dup2(fdi, STDIN_FILENO);
-							close(fdi);
-						}
-						if(data->outfile != NULL)
-						{
-							fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
-							dup2(fdo, STDOUT_FILENO);
-							close(fdo);
-						}
-						
-
-						printf("%s\n", data->TheCommands[0].command);
-						if(execvp(data->TheCommands[0].command, Param_List) < 0)
-						{
-							strcpy(subPATH,strtok(path, delim));
-							while( subPATH != NULL )
+							dup2(fdin, 0);
+							close (fdin);
+							if (i == data -> numcommands -1)
 							{
-								strcat(subPATH, "/");
-								strcat(subPATH, data->TheCommands[0].command);
-								execvp(subPATH, Param_List);
-								strcpy(subPATH,strtok(NULL, delim));
+								if (data -> outfile != NULL)
+								{
+									fdout = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+								}
+								else
+								{
+									fdout = dup(tmpout);
+								}
+							}
+							else
+							{
+								int fdpipe[2];
+								if(pipe(fdpipe) == -1)
+									printf("Pipe failed");
+								fdin = fdpipe[0];
+								fdout = fdpipe[1];
+							}
+							dup2(fdout, 1);
+							close(fdout);
+							int pipeid = fork();
+							if(pipeid == 0)
+							{
+								if(execvp(data->TheCommands[0].command, Param_List) < 0)
+								{
+									strcpy(subPATH,strtok(path, delim));
+									while( subPATH != NULL )
+									{
+										strcat(subPATH, "/");
+										strcat(subPATH, data->TheCommands[0].command);
+										execvp(subPATH, Param_List);
+										strcpy(subPATH,strtok(NULL, delim));
 
+									}
+								}
+								else
+								{
+									printf("Exec failed\n");
+									exit(-1);
+								}
+								exit(0);
+							}
+							else
+							{
+								dup2(0,tmpin);
+								dup2(1,tmpin);
 							}
 						}
-						else
-						{
-							printf("Exec failed\n");
-							exit(-1);
-						}
+						exit(0);
 					}
 					else if(data->background == 0)
 					{
-						ret_pid = wait(&status);
-						printf("Child complete: %d\n", ret_pid);
+						wait(&status);
 					}
-					else
-						printf("I made it out!\n");
 				}
 
 
@@ -224,7 +251,6 @@ int main(int argc, char *argv[])
 					printf("not built in\n");
 			}
 		}
-
 	}
 
 	exit(0);
