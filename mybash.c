@@ -79,15 +79,7 @@ int main(int argc, char *argv[])
 		else
 		{
 			ParseCommandLine(bashcommand, data); //populate the struct
-			
-
-				Param_List[0] = data->TheCommands[0].command; 
-				
-				for (int i = 0; i < data->TheCommands[0].numargs; ++i)
-					Param_List[i+1] = 	data->TheCommands[0].args[i];
-				
-				Param_List[data->TheCommands[0].numargs+1] = NULL;
-
+		
 				if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
 				{
 
@@ -127,10 +119,11 @@ int main(int argc, char *argv[])
 						if(data -> numcommands == 2)
 						{
 							int fdpipe[2];
-							if(!pipe(fdpipe))
+							if(pipe(fdpipe) != 0)
+							{
 								exit(1);
+							}
 							f2 = fork();
-
 							if (f2 == 0)
 							{
 								close(fdpipe[0]);
@@ -172,8 +165,15 @@ int main(int argc, char *argv[])
 								close(fdo);
 							}
 						}
-						if(data -> numcommands == 1 || f2 == 0)
+						if(f2 == 0)
 						{
+							Param_List[0] = data->TheCommands[0].command; 
+				
+							for (int i = 0; i < data->TheCommands[0].numargs; ++i)
+								Param_List[i+1] = 	data->TheCommands[0].args[i];
+				
+							Param_List[data->TheCommands[0].numargs+1] = NULL;
+
 							if(execvp(data->TheCommands[0].command, Param_List) < 0)
 							{
 								strcpy(subPATH,strtok(path, delim));
@@ -187,8 +187,15 @@ int main(int argc, char *argv[])
 								}
 							}
 						}
-						else if(data -> numcommands == 2)
+						else if(f2 != 0)
 						{
+							Param_List[0] = data->TheCommands[1].command; 
+				
+							for (int i = 0; i < data->TheCommands[1].numargs; ++i)
+								Param_List[i+1] = 	data->TheCommands[1].args[i];
+				
+							Param_List[data->TheCommands[1].numargs+1] = NULL;
+							
 							if(execvp(data->TheCommands[1].command, Param_List) < 0)
 							{
 								strcpy(subPATH,strtok(path, delim));
