@@ -80,33 +80,31 @@ int main(int argc, char *argv[])
 		{
 			ParseCommandLine(bashcommand, data); //populate the struct
 			
-			for(int i = 0; i < data->numcommands; i++)
-			{
 
-				Param_List[i] = data->TheCommands[i].command; 
+				Param_List[0] = data->TheCommands[0].command; 
 				
-				for (int i = 0; i < data->TheCommands[i].numargs; ++i)
-					Param_List[i+1] = 	data->TheCommands[i].args[i];
+				for (int i = 0; i < data->TheCommands[0].numargs; ++i)
+					Param_List[i+1] = 	data->TheCommands[0].args[i];
 				
-				Param_List[data->TheCommands[i].numargs+1] = NULL;
+				Param_List[data->TheCommands[0].numargs+1] = NULL;
 
-				if (strcmp(data->TheCommands[i].command, "cd") == 0 && data->TheCommands[i].numargs == 0 )
+				if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
 				{
 
 					if (chdir(getenv("HOME")) != 0)
 						printf("Err\n");
 				}
-				else if (strcmp(data->TheCommands[i].command, "cd") == 0 && data->TheCommands[i].numargs == 1)
+				else if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 1)
 				{
-					if (chdir(strcat(strcat(cwd,"/"),data->TheCommands[i].args[0]) ) != 0)
+					if (chdir(strcat(strcat(cwd,"/"),data->TheCommands[0].args[0]) ) != 0)
 						printf("Err\n");
 				}
 
-				else if (strcmp(data->TheCommands[i].command, "pwd") == 0 )
+				else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )
 				{
 					printf("%s\n",cwd);
 				}		
-				else if (strcmp(data->TheCommands[i].command, "exit") == 0 )
+				else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
 				{
 					printf("The program will now terminate\n\n");
 				}		
@@ -140,14 +138,14 @@ int main(int argc, char *argv[])
 						}
 						
 
-						printf("%s\n", data->TheCommands[i].command);
-						if(execvp(data->TheCommands[i].command, Param_List) < 0)
+						printf("%s\n", data->TheCommands[0].command);
+						if(execvp(data->TheCommands[0].command, Param_List) < 0)
 						{
 							strcpy(subPATH,strtok(path, delim));
 							while( subPATH != NULL )
 							{
 								strcat(subPATH, "/");
-								strcat(subPATH, data->TheCommands[i].command);
+								strcat(subPATH, data->TheCommands[0].command);
 								execvp(subPATH, Param_List);
 								strcpy(subPATH,strtok(NULL, delim));
 
@@ -168,7 +166,6 @@ int main(int argc, char *argv[])
 						printf("I made it out!\n");
 				}
 
-			}
 
 
 			if(debug == 1)
