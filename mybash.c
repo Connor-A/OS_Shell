@@ -115,15 +115,6 @@ int main(int argc, char *argv[])
 
 				else 
 				{
-					int tmpin = dup(0);
-					int tmpout = dup(1);
-
-					int fdin, fdout;
-					if(data -> infile != NULL)
-						fdin = open(data -> infile, O_RDONLY, 0);
-					else
-						fdin = dup(0);
-
 					pid = fork();
 					if(pid < 0)
 					{
@@ -132,60 +123,85 @@ int main(int argc, char *argv[])
 					}
 					else if(pid == 0)
 					{
-						for(int i = 0; i < data -> numcommands; ++i)
+						int f2 = 0, fdi, fdo;
+						if(data -> numcommands == 2)
 						{
-							dup2(fdin, 0);
-							close (fdin);
-							if (i == data -> numcommands -1)
-							{
-								if (data -> outfile != NULL)
-								{
-									fdout = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
-								}
-								else
-								{
-									fdout = dup(tmpout);
-								}
-							}
-							else
-							{
-								int fdpipe[2];
-								if(pipe(fdpipe) == -1)
-									printf("Pipe failed");
-								fdin = fdpipe[0];
-								fdout = fdpipe[1];
-							}
-							dup2(fdout, 1);
-							close(fdout);
-							int pipeid = fork();
-							if(pipeid == 0)
-							{
-								if(execvp(data->TheCommands[0].command, Param_List) < 0)
-								{
-									strcpy(subPATH,strtok(path, delim));
-									while( subPATH != NULL )
-									{
-										strcat(subPATH, "/");
-										strcat(subPATH, data->TheCommands[0].command);
-										execvp(subPATH, Param_List);
-										strcpy(subPATH,strtok(NULL, delim));
+							int fdpipe[2];
+							if(!pipe(fdpipe))
+								exit(1);
+							f2 = fork();
 
-									}
-								}
-								else
+							if (f2 == 0)
+							{
+								close(fdpipe[0]);
+								dup2(fdpipe[1],1);
+								close(fdpipe[1]);
+								
+								if(data->infile != NULL)
 								{
-									printf("Exec failed\n");
-									exit(-1);
+									fdi = open(data->infile, O_RDONLY ,0);
+									dup2(fdi, 0);
+									close(fdi);
 								}
-								exit(0);
 							}
 							else
 							{
-								dup2(0,tmpin);
-								dup2(1,tmpin);
+								close(fdpipe[1]);
+								dup2(fdpipe[0],0);
+								close(fdpipe[0]);
+								if(data->outfile != NULL)
+								{
+									fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+									dup2(fdo, STDOUT_FILENO);
+									close(fdo);
+								}
 							}
 						}
-						exit(0);
+						else
+						{
+							if(data->infile != NULL)
+							{
+								fdi = open(data->infile, O_RDONLY ,0);
+								dup2(fdi, 0);
+								close(fdi);
+							}
+							if(data->outfile != NULL)
+							{
+								fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+								dup2(fdo, STDOUT_FILENO);
+								close(fdo);
+							}
+						}
+						if(data -> numcommands == 1 || f2 == 0)
+						{
+							if(execvp(data->TheCommands[0].command, Param_List) < 0)
+							{
+								strcpy(subPATH,strtok(path, delim));
+								while( subPATH != NULL )
+								{
+									strcat(subPATH, "/");
+									strcat(subPATH, data->TheCommands[0].command);
+									execvp(subPATH, Param_List);
+									strcpy(subPATH,strtok(NULL, delim));
+
+								}
+							}
+						}
+						else if(data -> numcommands == 2)
+						{
+							if(execvp(data->TheCommands[1].command, Param_List) < 0)
+							{
+								strcpy(subPATH,strtok(path, delim));
+								while( subPATH != NULL )
+								{
+									strcat(subPATH, "/");
+									strcat(subPATH, data->TheCommands[1].command);
+									execvp(subPATH, Param_List);
+									strcpy(subPATH,strtok(NULL, delim));
+
+								}
+							}	
+						}
 					}
 					else if(data->background == 0)
 					{
@@ -251,8 +267,8 @@ int main(int argc, char *argv[])
 					printf("not built in\n");
 			}
 		}
+
 	}
 
 	exit(0);
 }
-
