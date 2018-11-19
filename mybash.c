@@ -82,7 +82,6 @@ int main(int argc, char *argv[])
 			
 			for(int i = 0; i < data->numcommands; i++)
 			{
-				strcpy(subPATH,strtok(path, delim));
 
 				Param_List[i] = data->TheCommands[i].command; 
 				
@@ -144,6 +143,7 @@ int main(int argc, char *argv[])
 						printf("%s\n", data->TheCommands[i].command);
 						if(execvp(data->TheCommands[i].command, Param_List) < 0)
 						{
+							strcpy(subPATH,strtok(path, delim));
 							while( subPATH != NULL )
 							{
 								strcat(subPATH, "/");
