@@ -1,0 +1,30 @@
+a.out
+hello.cc
+Makefile
+mybash
+mybash.c
+mybash.o
+OS_Shell
+parser.c
+parser.h
+parser.o
+test
+test1
+test.txt
+Child complete: 6316
+/home/grey/Desktop/OS_Shell$  
+a.out
+hello.cc
+Makefile
+mybash
+mybash.c
+mybash.o
+OS_Shell
+parser.c
+parser.h
+parser.o
+test
+test1
+test.txt
+Child complete: 6317
+/home/grey/Desktop/OS_Shell$  

@@ -23,7 +23,7 @@
 #define WRITE 1
 
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char **envp)
 {
 	int go = 1;
 	int debug = 0;
@@ -110,7 +110,11 @@ int main(int argc, char *argv[])
 				}		
 				else if (strcmp(data->TheCommands[0].command, "set") == 0 )
 				{
-					printf("SET!\n\n");
+					for(char **env = envp; *env != 0; env++)
+					{
+						char *myEnv = *env;
+						printf("%s\n", myEnv);
+					}
 				}
 
 				else 
