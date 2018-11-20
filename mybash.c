@@ -23,55 +23,53 @@
 #define WRITE 1
 
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[], char **envp)
 {
-	int go = 1;
-	int debug = 0;
+	int go = 1; //controls if the program goes
+	int debug = 0; //sets debug state
 
 	while(go)
 	{
 		int args = 0; //will hold the length of the argument list
-		char bashcommand[2000];
-		pid_t pid;
-		int status;
+		char bashcommand[2000]; //holds input from user
+		pid_t pid; //keeps track of process ID
+		int status; //used for forking
 
 
-		struct CommandData *data = &(struct CommandData){.numcommands = 0, .infile="", .outfile="", .background=0};
+		struct CommandData *data = &(struct CommandData){.numcommands = 0, .infile="", .outfile="", .background=0}; //default struct
 
-		char* path = getenv("PATH");
-		const char * delim = ":";
-		//printf("PATH :%s\n",(path!=NULL)? path : "getenv returned NULL");
-		//printf("end test\n");
+		char* path = getenv("PATH"); //gets PATH
+		const char * delim = ":"; //used for parsing
+		
+		char* Param_List[13]; //used for paramlist for execv
+		char subPATH[100];    //used for parsing PATH
 
-		char* Param_List[13];
-		char subPATH[100];
-
-		char cwd[PATH_MAX];
-		if (getcwd(cwd, sizeof(cwd)) != NULL) {
+		char cwd[PATH_MAX];   //current working directory
+		if (getcwd(cwd, sizeof(cwd)) != NULL) { //get cwd
 			printf("%s$  ", cwd);
 		} else {
 			perror("getcwd() error");
 			return 1;
 		}
 
-		if(scanf("%[^\n]" , bashcommand) == 1)
+		if(scanf("%[^\n]" , bashcommand) == 1) //get command from user
 			printf("\n");
 		else
 			printf("%s\n", "Failed");
 
-		char unused = getchar();
+		char unused = getchar(); //Werror made me do this.
 		unused = unused + unused;
 
-		if(strcmp(bashcommand, "exit") == 0){
+		if(strcmp(bashcommand, "exit") == 0){ //Exit the program!
 			go = 0;
 		}
 		
-		if (strcmp(bashcommand, "DEBUG=yes") == 0 )
+		if (strcmp(bashcommand, "DEBUG=yes") == 0 ) //sets debug state to yes
 		{
 			printf("Entering debug mode\n\n");
 			debug = 1;
 		}		
-		else if (strcmp(bashcommand, "DEBUG=no") == 0 )
+		else if (strcmp(bashcommand, "DEBUG=no") == 0 ) //sets debug state to no
 		{
 			printf("Exiting debug mode\n\n");
 			debug = 0;
@@ -80,7 +78,7 @@ int main(int argc, char *argv[])
 		{
 			ParseCommandLine(bashcommand, data); //populate the struct
 		
-				if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )
+				if (strcmp(data->TheCommands[0].command, "cd") == 0 && data->TheCommands[0].numargs == 0 )//built in commands
 				{
 
 					if (chdir(getenv("HOME")) != 0)
@@ -92,17 +90,21 @@ int main(int argc, char *argv[])
 						printf("Err\n");
 				}
 
-				else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )
+				else if (strcmp(data->TheCommands[0].command, "pwd") == 0 )//print working directory
 				{
 					printf("%s\n",cwd);
 				}		
-				else if (strcmp(data->TheCommands[0].command, "exit") == 0 )
+				else if (strcmp(data->TheCommands[0].command, "exit") == 0 )//exit the program
 				{
 					printf("The program will now terminate\n\n");
 				}		
-				else if (strcmp(data->TheCommands[0].command, "set") == 0 )
+				else if (strcmp(data->TheCommands[0].command, "set") == 0 ) //print the envirment variables
 				{
-					printf("SET!\n\n");
+					for(char **env = envp; *env != 0; env++)
+					{
+						char *thisEnv = *env;
+						printf("%s\n", thisEnv);
+					}
 				}
 
 				else 
@@ -154,18 +156,18 @@ int main(int argc, char *argv[])
 						{
 							if(data->infile != NULL)
 							{
-								fdi = open(data->infile, O_RDONLY ,0);
+								fdi = open(data->infile, O_RDONLY ,0); //input redirection
 								dup2(fdi, 0);
 								close(fdi);
 							}
 							if(data->outfile != NULL)
 							{
-								fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+								fdo = open(data->outfile, O_WRONLY|O_CREAT|O_TRUNC, 0666); //output redirection
 								dup2(fdo, STDOUT_FILENO);
 								close(fdo);
 							}
 						}
-						if(f2 == 0)
+						if(f2 == 0) //child!
 						{
 							Param_List[0] = data->TheCommands[0].command; 
 				
@@ -187,7 +189,7 @@ int main(int argc, char *argv[])
 								}
 							}
 						}
-						else if(f2 != 0)
+						else if(f2 != 0)//parent!
 						{
 							Param_List[0] = data->TheCommands[1].command; 
 				
@@ -210,7 +212,7 @@ int main(int argc, char *argv[])
 							}	
 						}
 					}
-					else if(data->background == 0)
+					else if(data->background == 0)//run in background?
 					{
 						wait(&status);
 					}
@@ -218,7 +220,7 @@ int main(int argc, char *argv[])
 
 
 
-			if(debug == 1)
+			if(debug == 1)//print debug information
 			{
 					//iterte over each command and rint it
 				for(int j = 0; j < data->numcommands; j++)
